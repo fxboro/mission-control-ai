@@ -4,7 +4,7 @@ import type {
 } from '@/types';
 
 // Generic CRUD Operations
-export class FirestoreService<T extends { id: string; userId?: string }> {
+export class FirestoreService<T extends { id?: string; userId?: string; createdAt?: number; updatedAt?: number }> {
   constructor(private collectionName: string) {}
 
   private getCollection() {

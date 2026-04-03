@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Search, Plus, Zap, Bell, User } from "lucide-react"
+import { Search, Plus, Zap, Bell, User, Settings } from "lucide-react"
 
-import { Input } from "@/components/ui/sidebar"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,

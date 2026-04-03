@@ -2,42 +2,108 @@
 
 import * as React from "react"
 import { PageHeader } from "@/components/page-header"
-import { EmptyState } from "@/components/empty-state"
-import { Bot, Play } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { AgentLeftPanel } from "./_components/agent-left-panel"
+import { AgentRightPanel } from "./_components/agent-right-panel"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  type AgentType,
+  type WorkflowType,
+  type AgentRunOutput,
+  getMockOutput,
+} from "./_components/mock-agent-data"
 
 export default function AgentsPage() {
-  const agents = [
-    { name: "Founder Agent", role: "Strategy & Spec", tag: "Product" },
-    { name: "Architect Agent", role: "System Design", tag: "Technical" },
-    { name: "Builder Agent", role: "Implementation", tag: "Technical" },
-  ]
+  const [selectedAgent, setSelectedAgent] = React.useState<AgentType | null>(null)
+  const [selectedWorkflow, setSelectedWorkflow] = React.useState<WorkflowType | null>(null)
+  const [selectedProject, setSelectedProject] = React.useState<string | null>(null)
+  const [selectedLead, setSelectedLead] = React.useState<string | null>(null)
+  const [contextTags, setContextTags] = React.useState<string[]>([])
+  const [goal, setGoal] = React.useState("")
+  const [isRunning, setIsRunning] = React.useState(false)
+  const [output, setOutput] = React.useState<AgentRunOutput | null>(null)
+
+  function handleAgentChange(agent: AgentType) {
+    setSelectedAgent(agent)
+    setSelectedWorkflow(null)
+    setOutput(null)
+  }
+
+  function handleWorkflowChange(workflow: WorkflowType) {
+    setSelectedWorkflow(workflow)
+  }
+
+  function handleRun() {
+    if (!selectedAgent || !selectedWorkflow) return
+
+    setIsRunning(true)
+    setOutput(null)
+
+    // Simulate API latency
+    setTimeout(() => {
+      const result = getMockOutput(selectedAgent, selectedWorkflow)
+      setOutput(result)
+      setIsRunning(false)
+    }, 1800)
+  }
+
   return (
     <div className="flex flex-col h-full bg-background/50">
       <PageHeader
         title="Agents Console"
-        description="Run specialized workflows tailored for coding, business, and learning."
+        description="Run role-based AI workflows, review structured outputs, and save results into your system."
       />
-      <div className="p-4 md:p-8 grid gap-4 grid-cols-1 md:grid-cols-3">
-         <div className="col-span-1 border-r pr-6 space-y-4">
-            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Available Agents</h3>
-            {agents.map((agent, i) => (
-              <div key={i} className="p-3 border rounded-md cursor-pointer hover:bg-muted/50 transition-colors">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-bold text-sm">{agent.name}</span>
-                  <Bot className="w-4 h-4 text-primary" />
+
+      <div className="flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 h-full max-w-[1400px] mx-auto">
+          {/* Left Panel — Input Controls */}
+          <div className="lg:col-span-4 xl:col-span-4 border-b lg:border-b-0 lg:border-r border-border/50">
+            <ScrollArea className="h-full">
+              <div className="p-4 md:p-6 lg:p-8">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="flex items-center justify-center size-7 rounded-lg bg-primary/10">
+                    <span className="text-xs font-black text-primary">IN</span>
+                  </div>
+                  <h2 className="text-sm font-bold text-foreground tracking-tight">
+                    Configure & Run
+                  </h2>
                 </div>
-                <div className="text-xs text-muted-foreground">{agent.role}</div>
+                <AgentLeftPanel
+                  selectedAgent={selectedAgent}
+                  selectedWorkflow={selectedWorkflow}
+                  selectedProject={selectedProject}
+                  selectedLead={selectedLead}
+                  contextTags={contextTags}
+                  goal={goal}
+                  isRunning={isRunning}
+                  onAgentChange={handleAgentChange}
+                  onWorkflowChange={handleWorkflowChange}
+                  onProjectChange={setSelectedProject}
+                  onLeadChange={setSelectedLead}
+                  onTagsChange={setContextTags}
+                  onGoalChange={setGoal}
+                  onRun={handleRun}
+                />
               </div>
-            ))}
-         </div>
-         <div className="col-span-2 pl-4">
-            <EmptyState 
-              icon={Play}
-              title="Select an Agent"
-              description="Choose an agent from the sidebar and provide a goal to run a structured workflow."
-            />
-         </div>
+            </ScrollArea>
+          </div>
+
+          {/* Right Panel — Output */}
+          <div className="lg:col-span-8 xl:col-span-8">
+            <ScrollArea className="h-full">
+              <div className="p-4 md:p-6 lg:p-8">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="flex items-center justify-center size-7 rounded-lg bg-primary/10">
+                    <span className="text-xs font-black text-primary">OUT</span>
+                  </div>
+                  <h2 className="text-sm font-bold text-foreground tracking-tight">
+                    Structured Output
+                  </h2>
+                </div>
+                <AgentRightPanel output={output} isLoading={isRunning} />
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -119,7 +119,7 @@ export const agentRunSchema = baseEntitySchema.extend({
   leadId: z.string().optional(),
   inputGoal: z.string(),
   contextTags: z.array(z.string()),
-  output: z.record(z.any()),
+  output: z.record(z.string(), z.any()),
   nextBestAction: z.string().optional(),
   status: agentRunStatusSchema,
 });
