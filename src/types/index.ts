@@ -1,130 +1,104 @@
-export type ProjectPhase = "spec" | "build" | "launch" | "maintenance" | "completed";
-export type ProjectType = "product" | "freelance" | "learning";
-export type ProjectStatus = "active" | "on_hold" | "completed" | "archived";
-export type Priority = "low" | "medium" | "high" | "urgent";
-export type TaskType = "feature" | "bug" | "chore" | "research";
-export type TaskStatus = "todo" | "in_progress" | "blocked" | "done";
-export type RiskLevel = "low" | "medium" | "high";
-export type LeadStatus = "new" | "qualified" | "proposal_sent" | "won" | "lost";
-export type ProposalStatus = "draft" | "sent" | "accepted" | "rejected";
-export type AgentRole = "execution" | "architect" | "builder" | "reviewer" | "founder" | "freelance" | "learning";
-export type AgentRunStatus = "pending" | "completed" | "failed";
+// ─────────────────────────────────────────────────────────────
+// Public Type API — Mission Control AI
+//
+// This barrel re-exports everything from the type modules.
+// All existing `import type { ... } from "@/types"` continue
+// to work without modification.
+//
+// Module Structure:
+//   enums.ts    — String literal unions (status, role, phase…)
+//   domain.ts   — Core entity interfaces (User, Project, Task…)
+//   payloads.ts — API payloads, UI view models, helpers
+// ─────────────────────────────────────────────────────────────
 
-export interface BaseEntity {
-  id: string;
-  userId: string;
-  createdAt: number;
-  updatedAt: number;
-}
+// Enums & union types
+export type {
+  ProjectPhase,
+  ProjectType,
+  ProjectStatus,
+  RiskLevel,
+  Severity,
+  TaskType,
+  TaskStatus,
+  Priority,
+  GoalType,
+  GoalStatus,
+  AgentRole,
+  WorkflowType,
+  AgentRunStatus,
+  AgentVerbosity,
+  LeadStatus,
+  LeadSource,
+  ProposalStatus,
+  BudgetSignal,
+  SkillLevel,
+  LearningStatus,
+  SprintStatus,
+  MemoryType,
+  UserMode,
+  IntegrationType,
+} from "./enums";
 
-export interface User {
-  uid: string;
-  email: string;
-  name: string;
-  createdAt: number;
-  missionStatement?: string;
-  preferredStack?: string[];
-  weeklyCapacity?: number;
-  businessFocus?: string[];
-  growthFocus?: string[];
-  primaryMode?: "builder" | "founder" | "freelance" | "hybrid";
-}
+// Domain entities
+export type {
+  BaseEntity,
+  User,
+  Goal,
+  Project,
+  Task,
+  Decision,
+  PlaybookStep,
+  Playbook,
+  Lead,
+  ProposalLineItem,
+  Proposal,
+  AgentRun,
+  AgentPreference,
+  Memory,
+  LearningItem,
+  WeakSpot,
+  StudySprint,
+  ServiceTemplate,
+  Integration,
+} from "./domain";
 
-export interface Goal extends BaseEntity {
-  title: string;
-  description?: string;
-  timeframe: string; // e.g. "2026-W14"
-  status: ProjectStatus;
-  progress?: number; // 0-100
-}
-
-export interface Project extends BaseEntity {
-  name: string;
-  type: ProjectType;
-  status: ProjectStatus;
-  summary: string;
-  targetUser?: string;
-  problem?: string;
-  phase: ProjectPhase;
-  stack?: string[];
-  currentFocus?: string;
-  nextMilestone?: string;
-  risk: RiskLevel;
-}
-
-export interface Task extends BaseEntity {
-  title: string;
-  projectId?: string;
-  type: TaskType;
-  workflowId?: string;
-  priority: Priority;
-  dueDate?: number;
-  status: TaskStatus;
-  assignee?: string;
-}
-
-export interface Decision extends BaseEntity {
-  title: string;
-  projectId?: string;
-  context: string;
-  optionsConsidered: string[];
-  chosenOption: string;
-  rationale: string;
-  tradeoffs?: string;
-  risks?: string;
-  reviewDate?: number;
-}
-
-export interface Playbook extends BaseEntity {
-  title: string;
-  category: string;
-  summary: string;
-  tags: string[];
-  steps: string[];
-  checklist: string[];
-  promptTemplate: string;
-  lastUsed?: number;
-}
-
-export interface Lead extends BaseEntity {
-  businessName: string;
-  contactName?: string;
-  niche?: string;
-  source?: string;
-  painPoint?: string;
-  urgency?: "low" | "medium" | "high";
-  budgetSignal?: "low" | "medium" | "high";
-  status: LeadStatus;
-  notes?: string;
-}
-
-export interface Proposal extends BaseEntity {
-  leadId: string;
-  title: string;
-  status: ProposalStatus;
-  problemSummary: string;
-  scope: string;
-  deliverables: string[];
-  timeline: string;
-  pricing: string;
-  assumptions?: string;
-}
-
-export interface AgentRun extends BaseEntity {
-  agentRole: AgentRole;
-  workflowId?: string;
-  projectId?: string;
-  leadId?: string;
-  inputGoal: string;
-  contextTags: string[];
-  output: Record<string, any>;
-  nextBestAction?: string;
-  status: AgentRunStatus;
-}
-
-export interface Memory extends BaseEntity {
-  type: "preference" | "fact" | "learning" | "rule";
-  content: string;
-  confidence: number; // 0-100
-  tags: string[];
-}
+// API payloads & UI view models
+export type {
+  CreatePayload,
+  UpdatePayload,
+  WithTimestamps,
+  CreateUserPayload,
+  UpdateUserPayload,
+  UserViewModel,
+  CreateProjectPayload,
+  UpdateProjectPayload,
+  ProjectListItem,
+  CreateTaskPayload,
+  UpdateTaskPayload,
+  TaskListItem,
+  CreateGoalPayload,
+  UpdateGoalPayload,
+  CreateDecisionPayload,
+  UpdateDecisionPayload,
+  DecisionListItem,
+  CreatePlaybookPayload,
+  UpdatePlaybookPayload,
+  CreateLeadPayload,
+  UpdateLeadPayload,
+  LeadListItem,
+  CreateProposalPayload,
+  UpdateProposalPayload,
+  ProposalListItem,
+  CreateAgentRunPayload,
+  AgentRunListItem,
+  CreateMemoryPayload,
+  UpdateMemoryPayload,
+  CreateLearningItemPayload,
+  UpdateLearningItemPayload,
+  CreateWeakSpotPayload,
+  CreateStudySprintPayload,
+  CreateServiceTemplatePayload,
+  UpdateServiceTemplatePayload,
+  PaginatedResponse,
+  ListFilters,
+} from "./payloads";

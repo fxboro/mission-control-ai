@@ -2,47 +2,73 @@
 
 import * as React from "react"
 import { PageHeader } from "@/components/page-header"
-import { Zap, Plus } from "lucide-react"
-import { StatusBadge } from "@/components/status-badge"
+import { Plus } from "lucide-react"
+import { PipelineSummary } from "./_components/pipeline-summary"
+import { LeadTable } from "./_components/lead-table"
+import { LeadDetailDrawer } from "./_components/lead-detail-drawer"
+import { ServiceTemplatesGrid } from "./_components/service-templates-grid"
+import { SearchInput } from "@/components/search-input"
+import { TagFilter } from "@/components/tag-filter"
+import { mockLeads, mockServiceTemplates, pipelineSummary } from "./_components/mock-freelance"
+import type { Lead } from "@/types"
+
+const statusFilters = ["new", "qualified", "proposal_sent", "won", "lost"]
 
 export default function FreelancePage() {
+  const [search, setSearch] = React.useState("")
+  const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>([])
+  const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null)
+  const [drawerOpen, setDrawerOpen] = React.useState(false)
+
+  const filtered = mockLeads.filter((lead) => {
+    const matchesSearch =
+      search === "" ||
+      lead.businessName.toLowerCase().includes(search.toLowerCase()) ||
+      (lead.contactName?.toLowerCase().includes(search.toLowerCase()) ?? false)
+
+    const matchesStatus =
+      selectedStatuses.length === 0 || selectedStatuses.includes(lead.status)
+
+    return matchesSearch && matchesStatus
+  })
+
+  function handleSelectLead(lead: Lead) {
+    setSelectedLead(lead)
+    setDrawerOpen(true)
+  }
+
   return (
-    <div className="flex flex-col h-full bg-background/50">
+    <div className="flex flex-col min-h-screen bg-background/50">
       <PageHeader
         title="Freelance Workspace"
         description="Move from lead to scoped, profitable work."
         primaryAction={{ label: "New Lead", icon: <Plus className="size-4" /> }}
       />
-      <div className="p-4 md:p-8">
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-5 mb-8">
-          {["New: 2", "Qualified: 1", "Proposal Sent: 1", "Won: 4", "Lost: 0"].map((stat) => (
-             <div key={stat} className="bg-card border rounded-md p-3 text-center">
-               <span className="text-sm font-bold text-muted-foreground">{stat}</span>
-             </div>
-          ))}
+      <div className="p-4 md:p-6 lg:p-8 flex flex-col gap-8 max-w-[1600px] w-full mx-auto">
+        {/* Pipeline Summary */}
+        <PipelineSummary summary={pipelineSummary} />
+
+        {/* Lead List */}
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <h2 className="text-lg font-bold tracking-tight">Lead Pipeline</h2>
+            <SearchInput value={search} onChange={setSearch} placeholder="Search leads..." className="sm:max-w-xs" />
+          </div>
+          <div className="mb-4">
+            <TagFilter tags={statusFilters} selected={selectedStatuses} onChange={setSelectedStatuses} />
+          </div>
+          <LeadTable leads={filtered} onSelectLead={handleSelectLead} />
         </div>
-        <h3 className="font-bold mb-4">Active Pipeline</h3>
-        <div className="border rounded-md overflow-hidden bg-card">
-           <table className="w-full text-sm text-left">
-             <thead className="bg-muted text-muted-foreground text-xs uppercase font-semibold">
-               <tr>
-                 <th className="px-4 py-3">Business</th>
-                 <th className="px-4 py-3">Niche</th>
-                 <th className="px-4 py-3">Status</th>
-                 <th className="px-4 py-3">Urgency</th>
-               </tr>
-             </thead>
-             <tbody className="divide-y divide-border">
-               <tr className="hover:bg-muted/30 cursor-pointer">
-                 <td className="px-4 py-3 font-medium">Acme Wellness</td>
-                 <td className="px-4 py-3 text-muted-foreground">Healthcare</td>
-                 <td className="px-4 py-3"><StatusBadge status="proposal_sent" /></td>
-                 <td className="px-4 py-3 text-destructive font-bold text-xs uppercase">High</td>
-               </tr>
-             </tbody>
-           </table>
-         </div>
+
+        {/* Service Templates */}
+        <div>
+          <h2 className="text-lg font-bold tracking-tight mb-4">Service Templates</h2>
+          <ServiceTemplatesGrid templates={mockServiceTemplates} />
+        </div>
       </div>
+
+      {/* Lead Detail Drawer */}
+      <LeadDetailDrawer lead={selectedLead} open={drawerOpen} onOpenChange={setDrawerOpen} />
     </div>
   )
 }
