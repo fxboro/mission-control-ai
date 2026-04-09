@@ -17,6 +17,8 @@ import {
 } from "lucide-react"
 import type { AgentRunOutput, OutputSection } from "./mock-agent-data"
 
+import type { SaveAction } from "@/lib/agents/types"
+
 interface AgentRightPanelProps {
   output: AgentRunOutput | null
   isLoading: boolean
@@ -215,7 +217,7 @@ export function AgentRightPanel({ output, isLoading }: AgentRightPanelProps) {
 
       {/* Save Actions */}
       <div className="mt-4">
-        <SaveActionsBar visible={true} />
+        <SaveActionsBar actions={output.saveActions || []} visible={true} />
       </div>
     </div>
   )

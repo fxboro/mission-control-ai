@@ -60,6 +60,27 @@ function formatTasks(context: AgentContext): string {
     .join("\n");
 }
 
+function formatDecisions(context: AgentContext): string {
+  if (!context.decisions || context.decisions.length === 0) return "No recent decisions.";
+  return context.decisions
+    .map((d) => `- ${d.title}: Chosen [${d.chosenOption}] because ${d.rationale}`)
+    .join("\n");
+}
+
+function formatAgentRuns(context: AgentContext): string {
+  if (!context.agentRuns || context.agentRuns.length === 0) return "No recent agent runs.";
+  return context.agentRuns
+    .map((r) => `- [${r.agentRole}] ${r.workflowId}: ${r.inputGoal}`)
+    .join("\n");
+}
+
+function formatLearningItems(context: AgentContext): string {
+  if (!context.learningItems || context.learningItems.length === 0) return "No active learning items.";
+  return context.learningItems
+    .map((l) => `- [${l.status}] ${l.title} (${l.skillLevel}, ${l.progress}% complete)`)
+    .join("\n");
+}
+
 function formatGoals(context: AgentContext): string {
   if (context.goals.length === 0) return "No active goals.";
   return context.goals
@@ -238,7 +259,8 @@ Respond with this exact JSON structure:
   "learnings": ["string"],
   "nextWeekPriorities": ["string"],
   "suggestedGoals": ["string"],
-  "overallMomentum": "strong|steady|slow|stalled"
+  "overallMomentum": "strong|steady|slow|stalled",
+  "learningTarget": "string"
 }`,
     userPrompt: `## Goal
 ${ctx.inputGoal}
@@ -249,8 +271,17 @@ ${formatGoals(ctx)}
 ## Project Context
 ${formatProject(ctx)}
 
-## Current Tasks
+## Tasks (Current & Recent)
 ${formatTasks(ctx)}
+
+## Recent Decisions
+${formatDecisions(ctx)}
+
+## Recent Agent Runs
+${formatAgentRuns(ctx)}
+
+## Learning Items
+${formatLearningItems(ctx)}
 
 ## User Memories & Preferences
 ${formatMemories(ctx)}

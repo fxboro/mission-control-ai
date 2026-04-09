@@ -24,17 +24,31 @@ export function mapSaveActions(
   workflowId: V1WorkflowId,
   output: WorkflowOutput,
   projectId?: string,
-  leadId?: string
+  leadId?: string,
+  agentRunId?: string
 ): SaveAction[] {
   const mappers: Record<V1WorkflowId, () => SaveAction[]> = {
     idea_to_mvp: () => mapIdeaToMvpActions(output as IdeaToMvpOutput),
     mvp_to_technical_plan: () => mapMvpToTechnicalPlanActions(output as MvpToTechnicalPlanOutput, projectId),
     feature_to_build_plan: () => mapFeatureToBuildPlanActions(output as FeatureToBuildPlanOutput, projectId),
-    lead_to_proposal: () => mapLeadToProposalActions(output as LeadToProposalOutput, leadId),
+    lead_to_proposal: () => mapLeadToProposalActions(output as LeadToProposalOutput, leadId, projectId),
     weekly_review: () => mapWeeklyReviewActions(output as WeeklyReviewOutput),
   };
 
-  return mappers[workflowId]();
+  let actions = mappers[workflowId]();
+
+  // Attach agentRunId as sourceRunId for traceability
+  if (agentRunId) {
+    actions = actions.map(action => ({
+      ...action,
+      payload: {
+        ...action.payload,
+        sourceRunId: agentRunId,
+      }
+    }));
+  }
+
+  return actions;
 }
 
 // ── Per-Workflow Mappers ─────────────────────────────────────
@@ -139,10 +153,26 @@ function mapFeatureToBuildPlanActions(output: FeatureToBuildPlanOutput, projectI
     });
   });
 
+  // Action 2: Save as a reusable Playbook
+  actions.push({
+    key: "save_playbook",
+    label: "Save as Playbook",
+    collection: "playbooks",
+    payload: {
+      title: output.featureSummary.substring(0, 50),
+      category: "Feature Implementation",
+      summary: output.featureSummary,
+      tags: output.riskFlags ?? [],
+      steps: output.tasks.map(t => t.title),
+      checklist: output.acceptanceCriteria ?? [],
+      promptTemplate: "Use this playbook to guide similar feature development in the future."
+    }
+  });
+
   return actions;
 }
 
-function mapLeadToProposalActions(output: LeadToProposalOutput, leadId?: string): SaveAction[] {
+function mapLeadToProposalActions(output: LeadToProposalOutput, leadId?: string, projectId?: string): SaveAction[] {
   return [
     {
       key: "create_proposal",
@@ -150,6 +180,7 @@ function mapLeadToProposalActions(output: LeadToProposalOutput, leadId?: string)
       collection: "proposals",
       payload: {
         leadId: leadId ?? "",
+        projectId: projectId,
         title: output.proposalTitle,
         status: "draft",
         problemSummary: output.problemSummary,

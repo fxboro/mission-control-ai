@@ -85,6 +85,7 @@ export const weeklyReviewOutputSchema = z.object({
   nextWeekPriorities: z.array(z.string()),
   suggestedGoals: z.array(z.string()),
   overallMomentum: z.enum(["strong", "steady", "slow", "stalled"]),
+  learningTarget: z.string(),
 });
 
 // ── Schema Registry ──────────────────────────────────────────

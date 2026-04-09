@@ -1,8 +1,9 @@
 import type { AgentRole } from "@/types";
+import type { SaveAction } from "@/lib/agents/types";
 
 // ─── Agent Type & Workflow Type ─────────────────────────────────────────────
 
-export type AgentType = "founder" | "architect" | "builder";
+export type AgentType = "founder" | "architect" | "builder" | "execution" | "freelance";
 
 export type WorkflowType =
   | "idea_to_mvp"
@@ -13,7 +14,9 @@ export type WorkflowType =
   | "database_schema"
   | "implementation_plan"
   | "code_review_prep"
-  | "sprint_breakdown";
+  | "sprint_breakdown"
+  | "weekly_review"
+  | "lead_to_proposal";
 
 export interface AgentOption {
   id: AgentType;
@@ -50,11 +53,40 @@ export interface AgentRunOutput {
     description: string;
     actionLabel: string;
   };
+  saveActions: SaveAction[];
 }
 
 // ─── Agent Definitions ──────────────────────────────────────────────────────
 
 export const agentOptions: AgentOption[] = [
+  {
+    id: "freelance",
+    name: "Freelance Agent",
+    role: "freelance",
+    description: "Lead management and proposal generation",
+    icon: "💼",
+    workflows: [
+      {
+        id: "lead_to_proposal",
+        name: "Draft Proposal",
+        description: "Turn a lead and notes into a clear draft proposal.",
+      }
+    ]
+  },
+  {
+    id: "execution",
+    name: "Execution Agent",
+    role: "execution",
+    description: "Productivity, reviews, and execution strategizing",
+    icon: "📈",
+    workflows: [
+      {
+        id: "weekly_review",
+        name: "Weekly Review",
+        description: "Review recent tasks, blockers, and decisions to plan out the next week in focus areas.",
+      }
+    ],
+  },
   {
     id: "founder",
     name: "Founder Agent",
@@ -225,6 +257,29 @@ export const mockFounderOutput: AgentRunOutput = {
       "Now that the MVP spec is defined, convert it into a technical architecture plan with stack decisions, module breakdown, and database schema.",
     actionLabel: "Run Architect → MVP to Technical Plan",
   },
+  saveActions: [
+    {
+      key: "create_project",
+      label: "Create Project",
+      collection: "projects",
+      payload: {
+        name: "Personal OS",
+        type: "product",
+        status: "active",
+        summary: "Build a personal operating system that helps a solo technical founder manage projects...",
+      }
+    },
+    {
+      key: "task_1",
+      label: "Create Task",
+      collection: "tasks",
+      payload: {
+        title: "Setup Next.js & Tailwind project",
+        type: "chore",
+        status: "todo",
+      }
+    }
+  ]
 };
 
 export const mockArchitectOutput: AgentRunOutput = {
@@ -311,6 +366,19 @@ learningItems/{itemId}         — userId indexed`,
       "Architecture is defined. Break the first milestone into a sprint with daily implementation targets.",
     actionLabel: "Run Builder → Sprint Breakdown",
   },
+  saveActions: [
+    {
+      key: "save_decision_1",
+      label: "Save Architecture Selection",
+      collection: "decisions",
+      payload: {
+        title: "Use Firebase Next.js Stack",
+        context: "Architecture planning",
+        chosenOption: "Next.js 15 + Firebase",
+        rationale: "Familiarity and fast time to market"
+      }
+    }
+  ]
 };
 
 export const mockBuilderOutput: AgentRunOutput = {
@@ -389,6 +457,194 @@ export const mockBuilderOutput: AgentRunOutput = {
       "The implementation plan is ready. Start with step 1 and work through sequentially. Ship the Agents Console today.",
     actionLabel: "Create Tasks from Plan",
   },
+  saveActions: [
+    {
+      key: "save_playbook_1",
+      label: "Save as Playbook",
+      collection: "playbooks",
+      payload: {
+        title: "Agent Build Step",
+        category: "implementation",
+        summary: "Build Agents Console page components",
+        steps: [
+          "Install missing shadcn/ui components",
+          "Define TypeScript types",
+          "Create mock structured output",
+        ]
+      }
+    }
+  ]
+};
+
+export const mockExecutionOutput: AgentRunOutput = {
+  agentType: "execution",
+  workflowName: "Weekly Review",
+  timestamp: Date.now(),
+  sections: [
+    {
+      id: "summary",
+      title: "Situation Summary",
+      type: "text",
+      content: "Solid week. You pushed forward on the core Agent Console elements, closing out major project architectural tasks while picking up a client lead. Momentum is positive but needs focus to ship MVP.",
+    },
+    {
+      id: "lessons",
+      title: "Lessons Learned",
+      type: "list",
+      content: "",
+      items: [
+        "Keeping all agent models tightly typed with Zod speeds up UI integration significantly.",
+        "Sales call conversion is higher when sending immediate proposals. Try saving proposals directly via Agent pipelines.",
+      ],
+    },
+    {
+      id: "blockers",
+      title: "Blockers to Resolve",
+      type: "list",
+      content: "",
+      items: [
+        "Decide on final persistence layer (Firebase vs Postgres) before attempting real-time agent output save actions.",
+        "Refactor learning module layout to accommodate wider screens.",
+      ],
+    },
+    {
+      id: "focus",
+      title: "Next Week Focus Areas",
+      type: "list",
+      content: "",
+      items: [
+        "Finalize and integrate Firebase for all Save Actions.",
+        "Complete 'Learning' dashboard to bridge the weakness spot flow.",
+        "Deliver Acme Wellness Studio proposal.",
+      ],
+    },
+    {
+      id: "priorities",
+      title: "Top 3 Priorities",
+      type: "list",
+      content: "",
+      items: [
+        "1. Ship the Weekly Review workflow.",
+        "2. Hook Agents Console to real LLM backend endpoint.",
+        "3. Send the proposal for Acme Lead.",
+      ],
+    },
+    {
+      id: "learning",
+      title: "Targeted Learning",
+      type: "text",
+      content: "Deep Dive into Next.js App Router API Routes to structure securely bounded agent endpoints.",
+    },
+  ],
+  nextBestAction: {
+    title: "Create Focus Goals",
+    description: "Map out your next week into active goals and roll over blockers into standard tasks to resolve.",
+    actionLabel: "Save Review Goals",
+  },
+  saveActions: [
+    {
+      key: "save_goals",
+      label: "Save Action Items",
+      collection: "goals",
+      payload: {
+        title: "Ship Agent Run backend",
+        type: "weekly",
+        timeframe: "Next Week",
+      }
+    }
+  ]
+};
+
+export const mockFreelanceOutput: AgentRunOutput = {
+  agentType: "freelance",
+  workflowName: "Draft Proposal",
+  timestamp: Date.now(),
+  sections: [
+    {
+      id: "problem_summary",
+      title: "Client Problem Summary",
+      type: "text",
+      content: "The client needs a unified dashboard out-of-the-box that can bridge their chaotic, multi-platform HR workflow into a single source of truth.",
+    },
+    {
+      id: "scope",
+      title: "Recommended Scope",
+      type: "text",
+      content: "A minimal, custom Next.js HR Dashboard tying into their existing Workday API. It will include standard onboarding templates and leave management flow.",
+    },
+    {
+      id: "deliverables",
+      title: "Deliverables",
+      type: "list",
+      content: "",
+      items: [
+        "Core Dashboard Interface",
+        "Workday API Integration Module",
+        "Onboarding Document Generator",
+        "Admin Roles & Permissions",
+      ],
+    },
+    {
+      id: "timeline",
+      title: "Timeline Logic",
+      type: "text",
+      content: "Project estimated at 6 weeks. Week 1-2 for design and discovery, Week 3-5 for build, Week 6 for QA, launch, and training.",
+    },
+    {
+      id: "pricing",
+      title: "Pricing Logic",
+      type: "text",
+      content: "Fixed bid of $12,500 given the value-based outcome and standard risk buffer. Billed 50% upfront, 50% upon QA approval.",
+    },
+    {
+      id: "assumptions",
+      title: "Assumptions",
+      type: "list",
+      content: "",
+      items: [
+        "Client provides sandbox API keys immediately.",
+        "Design approval SLA is 48 hours maximum.",
+      ],
+    },
+    {
+      id: "risks",
+      title: "Risks",
+      type: "list",
+      content: "",
+      items: [
+        "Workday API rate limits could throttle the bulk export feature.",
+        "Delays in feedback loops given client's holiday schedule.",
+      ],
+    },
+  ],
+  nextBestAction: {
+    title: "Draft Proposal",
+    description: "The logic evaluates cleanly. You should save this structure to trigger proposal document generation, then review the final prose.",
+    actionLabel: "Save Proposal Draft",
+  },
+  saveActions: [
+    {
+      key: "save_proposal_draft",
+      label: "Save Proposal Draft",
+      collection: "proposals",
+      payload: {
+        title: "HR Dashboard Consolidation",
+        status: "draft",
+        problemSummary: "The client needs a unified dashboard out-of-the-box that can bridge their chaotic, multi-platform HR workflow into a single source of truth.",
+        scope: "A minimal, custom Next.js HR Dashboard tying into their existing Workday API. It will include standard onboarding templates and leave management flow.",
+        deliverables: [
+          "Core Dashboard Interface",
+          "Workday API Integration Module",
+          "Onboarding Document Generator",
+          "Admin Roles & Permissions"
+        ],
+        timeline: "Project estimated at 6 weeks. Week 1-2 for design and discovery, Week 3-5 for build, Week 6 for QA, launch, and training.",
+        pricing: "Fixed bid of $12,500 given the value-based outcome and standard risk buffer.",
+        assumptions: "Sandbox API keys immediately provided.",
+        risks: "API Rate limits.",
+      }
+    }
+  ]
 };
 
 // ─── Output lookup helper ───────────────────────────────────────────────────
@@ -404,6 +660,10 @@ export function getMockOutput(
       return mockArchitectOutput;
     case "builder":
       return mockBuilderOutput;
+    case "execution":
+      return mockExecutionOutput;
+    case "freelance":
+      return mockFreelanceOutput;
     default:
       return null;
   }

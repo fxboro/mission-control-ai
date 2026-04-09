@@ -35,8 +35,10 @@ export function LeadDetailDrawer({ lead, open, onOpenChange }: LeadDetailDrawerP
               </Link>
             </Button>
           ) : (
-            <Button className="flex-1 font-bold">
-              <FileText className="size-4 mr-1.5" /> Create Proposal
+            <Button asChild className="flex-1 font-bold">
+              <Link href={`/agents?agent=freelance&workflow=lead_to_proposal&leadId=${lead.id}`}>
+                <FileText className="size-4 mr-1.5" /> Create Proposal
+              </Link>
             </Button>
           )}
           <Button variant="outline" className="font-bold">

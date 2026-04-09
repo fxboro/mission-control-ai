@@ -201,6 +201,7 @@ export const proposalLineItemSchema = z.object({
 
 export const proposalSchema = baseEntitySchema.extend({
   leadId: z.string().min(1, "Lead ID is required"),
+  projectId: z.string().optional(),
   title: z.string().min(1, "Title is required"),
   status: proposalStatusSchema,
   problemSummary: z.string().min(1, "Problem summary is required"),

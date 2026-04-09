@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 interface WelcomeHeaderProps {
   name: string
@@ -22,9 +23,11 @@ export function WelcomeHeader({ name, mission, weeklyFocus }: WelcomeHeaderProps
           </p>
         </div>
       </div>
-      <Button size="lg" className="h-12 px-6 gap-2 shrink-0 shadow-md transition-all active:scale-95 group">
-        <Zap className="size-5 fill-primary-foreground group-hover:scale-110 transition-transform" />
-        <span className="font-bold">Run Agent</span>
+      <Button size="lg" className="h-12 px-6 gap-2 shrink-0 shadow-md transition-all active:scale-95 group" asChild>
+        <Link href="/agents?agent=execution&workflow=weekly_review">
+          <Zap className="size-5 fill-primary-foreground group-hover:scale-110 transition-transform" />
+          <span className="font-bold">Weekly Review</span>
+        </Link>
       </Button>
     </div>
   )

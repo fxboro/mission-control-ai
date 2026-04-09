@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { Suspense } from "react"
 import { PageHeader } from "@/components/page-header"
 import { AgentLeftPanel } from "./_components/agent-left-panel"
 import { AgentRightPanel } from "./_components/agent-right-panel"
@@ -11,12 +12,22 @@ import {
   type AgentRunOutput,
   getMockOutput,
 } from "./_components/mock-agent-data"
+import { useSearchParams } from "next/navigation"
 
-export default function AgentsPage() {
-  const [selectedAgent, setSelectedAgent] = React.useState<AgentType | null>(null)
-  const [selectedWorkflow, setSelectedWorkflow] = React.useState<WorkflowType | null>(null)
-  const [selectedProject, setSelectedProject] = React.useState<string | null>(null)
-  const [selectedLead, setSelectedLead] = React.useState<string | null>(null)
+function AgentsPageContent() {
+  const searchParams = useSearchParams()
+  const [selectedAgent, setSelectedAgent] = React.useState<AgentType | null>(
+    (searchParams.get("agent") as AgentType) || null
+  )
+  const [selectedWorkflow, setSelectedWorkflow] = React.useState<WorkflowType | null>(
+    (searchParams.get("workflow") as WorkflowType) || null
+  )
+  const [selectedProject, setSelectedProject] = React.useState<string | null>(
+    searchParams.get("projectId") || null
+  )
+  const [selectedLead, setSelectedLead] = React.useState<string | null>(
+    searchParams.get("leadId") || null
+  )
   const [contextTags, setContextTags] = React.useState<string[]>([])
   const [goal, setGoal] = React.useState("")
   const [isRunning, setIsRunning] = React.useState(false)
@@ -106,5 +117,13 @@ export default function AgentsPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AgentsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-muted-foreground flex justify-center text-sm">Loading console...</div>}>
+      <AgentsPageContent />
+    </Suspense>
   )
 }

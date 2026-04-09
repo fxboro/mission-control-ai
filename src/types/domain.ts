@@ -39,6 +39,7 @@ export interface BaseEntity {
   userId: string;
   createdAt: number; // epoch ms
   updatedAt: number; // epoch ms
+  sourceRunId?: string; // Links this entity to the agent run that created it
 }
 
 // ── User ─────────────────────────────────────────────────────

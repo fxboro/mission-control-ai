@@ -11,6 +11,10 @@ import { loadMemories } from "./memory-loader";
 import { loadProjectContext } from "./project-context-loader";
 import { goalService } from "@/lib/services/goal.service";
 import { leadService } from "@/lib/services/lead.service";
+import { taskService } from "@/lib/services/task.service";
+import { decisionService } from "@/lib/services/decision.service";
+import { agentRunService } from "@/lib/services/agent-run.service";
+import { learningItemService } from "@/lib/services/learning-item.service";
 import { getWorkflowDefinition } from "./workflow-registry";
 
 export interface ContextBuilderParams {
@@ -33,8 +37,10 @@ export async function buildAgentContext(params: ContextBuilderParams): Promise<A
   const needsLead = !!request.leadId || definition.agentRole === "freelance";
   const contextTags = request.contextTags ?? [];
 
+  const isWeeklyReview = workflowId === "weekly_review";
+
   // Load everything in parallel for speed
-  const [memories, projectCtx, goals, lead] = await Promise.all([
+  const [memories, projectCtx, goals, lead, allTasks, decisions, agentRuns, learningItems] = await Promise.all([
     loadMemories(userId, contextTags),
     needsProject && request.projectId
       ? loadProjectContext(request.projectId)
@@ -43,6 +49,10 @@ export async function buildAgentContext(params: ContextBuilderParams): Promise<A
     needsLead && request.leadId
       ? leadService.getById(request.leadId)
       : Promise.resolve(null),
+    isWeeklyReview ? taskService.listByUser(userId) : Promise.resolve([]),
+    isWeeklyReview ? decisionService.listByUser(userId) : Promise.resolve([]),
+    isWeeklyReview ? agentRunService.listByUser(userId) : Promise.resolve([]),
+    isWeeklyReview ? learningItemService.listByUser(userId) : Promise.resolve([]),
   ]);
 
   return {
@@ -50,8 +60,11 @@ export async function buildAgentContext(params: ContextBuilderParams): Promise<A
     memories,
     project: projectCtx.project,
     goals,
-    tasks: projectCtx.tasks,
+    tasks: isWeeklyReview ? allTasks : projectCtx.tasks,
     lead,
+    decisions,
+    agentRuns,
+    learningItems,
     additionalContext: request.context,
     contextTags,
   };

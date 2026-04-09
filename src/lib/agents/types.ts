@@ -4,7 +4,7 @@
 
 import type { z } from "zod";
 import type { AgentRole, WorkflowType } from "@/types";
-import type { ProjectSchemaType, GoalSchemaType, TaskSchemaType, LeadSchemaType, MemorySchemaType } from "@/lib/validators";
+import type { ProjectSchemaType, GoalSchemaType, TaskSchemaType, LeadSchemaType, MemorySchemaType, DecisionSchemaType, AgentRunSchemaType, LearningItemSchemaType } from "@/lib/validators";
 
 // ── Workflow Definitions ─────────────────────────────────────
 
@@ -52,6 +52,15 @@ export interface AgentContext {
 
   /** Lead context for freelance workflows. */
   lead: LeadSchemaType | null;
+
+  /** Recent decisions context (optional). */
+  decisions?: DecisionSchemaType[];
+
+  /** Recent agent runs (optional). */
+  agentRuns?: AgentRunSchemaType[];
+
+  /** Active or completed learning items (optional). */
+  learningItems?: LearningItemSchemaType[];
 
   /** Additional user-supplied freeform context. */
   additionalContext?: string;
@@ -160,6 +169,7 @@ export interface WeeklyReviewOutput {
   nextWeekPriorities: string[];
   suggestedGoals: string[];
   overallMomentum: "strong" | "steady" | "slow" | "stalled";
+  learningTarget: string;
 }
 
 /** Union of all structured outputs. */
